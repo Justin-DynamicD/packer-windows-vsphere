@@ -1,0 +1,69 @@
+{
+  "variables": {
+    "vcenter_server": "{{ env `VCENTER_SERVER` }}",
+    "vcenter_datacenter": "{{ env `VCENTER_DATACENTER` }}",
+    "vcenter_cluster": "{{ env `VCENTER_CLUSTER` }}",
+    "vcenter_datastore": "{{ env `VCENTER_DATASTORE` }}",
+    "vcenter_host": "{{ env `VCENTER_HOST` }}",
+    "vcenter_user": "{{ env `VCENTER_USER` }}",
+    "vcenter_password": "{{ env `VCENTER_PASSWORD` }}",
+    "vcenter_network": "{{ env `VCENTER_NETWORK` }}",
+    "win_user": "Administrator",
+    "win_password": "P@cker!"
+  },
+  "builders": [
+    {
+      "type": "vsphere-iso",
+      "vcenter_server": "{{user `vcenter_server` }}",
+      "datacenter": "{{ user `vcenter_datacenter` }}",
+      "cluster": "{{ user `vcenter_cluster` }}",
+      "datastore": "{{ user `vcenter_datastore` }}",
+      "host": "{{ user `vcenter_host` }}",
+      "username": "{{ user `vcenter_user` }}",
+      "password": "{{ user `vcenter_password` }}",
+      "insecure_connection": "true",
+
+      "vm_name": "packer-win2012-{{ timestamp }}",
+      "guest_os_type": "windows8Server64Guest",
+      "communicator": "winrm",
+      "winrm_timeout": "2h",
+      "winrm_use_ssl": true,
+      "winrm_insecure": true,
+      "winrm_username": "{{ user `win_user` }}",
+      "winrm_password": "{{ user `win_password` }}",
+
+      "CPUs": 2,
+      "RAM": 8192,
+      "disk_controller_type": "pvscsi",
+      "disk_size": 32768,
+      "disk_thin_provisioned": true,
+      "network_card": "vmxnet3",
+      "network": "{{ user `vcenter_network` }}",
+      "iso_paths": [
+        "[EB_SAN01_Linear_VL01] ISO/en_windows_server_2012_r2_vl_with_update_x64_dvd_6052766.iso",
+        "[EB_SAN01_Linear_VL01] ISO/vmtools/VMware-tools-windows-10.2.1-8267844.iso"
+      ],
+      "floppy_files": [
+        "{{template_dir}}/bootstrap/2012/",
+        "{{template_dir}}/scripts/winrm.ps1",
+        "{{template_dir}}/scripts/wmf51.cmd"
+      ]
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "windows-restart"
+    },
+    {
+      "type": "powershell",
+      "script": "{{template_dir}}/scripts/configure-host.ps1"
+    },
+    {
+      "type": "windows-update"
+    },
+    {
+      "type": "powershell",
+      "script": "{{template_dir}}/scripts/cleanup.ps1"
+    }
+  ]
+}
