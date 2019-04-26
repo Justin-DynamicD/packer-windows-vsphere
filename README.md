@@ -1,4 +1,4 @@
-# Packer Windows Server Vmware
+# Packer Windows Server VSphere
 
 Working sample code to generate Server Core templates used in Vsphere.  Requires 2 ISOs:
 
