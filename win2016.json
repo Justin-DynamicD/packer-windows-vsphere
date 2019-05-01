@@ -22,8 +22,9 @@
       "username": "{{ user `vcenter_user` }}",
       "password": "{{ user `vcenter_password` }}",
       "insecure_connection": "true",
+      "convert_to_template": "true",
 
-      "vm_name": "packer-win2016-{{ timestamp }}",
+      "vm_name": "packer-win2016-{{ isotime \"060102\" }}",
       "guest_os_type": "windows9Server64Guest",
       "communicator": "winrm",
       "winrm_timeout": "2h",
