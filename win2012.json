@@ -25,6 +25,7 @@
       "convert_to_template": "true",
 
       "vm_name": "packer-win2012-{{ isotime \"060102\" }}",
+      "folder": "Templates",
       "guest_os_type": "windows8Server64Guest",
       "communicator": "winrm",
       "winrm_timeout": "2h",
@@ -36,7 +37,7 @@
       "CPUs": 2,
       "RAM": 8192,
       "disk_controller_type": "pvscsi",
-      "disk_size": 32768,
+      "disk_size": 60000,
       "disk_thin_provisioned": true,
       "network_card": "vmxnet3",
       "network": "{{ user `vcenter_network` }}",

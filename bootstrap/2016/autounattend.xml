@@ -34,38 +34,37 @@
 				  <!-- Windows partition -->
 				  <CreatePartition wcm:action="add">
 					<Order>2</Order> 
-					<Type>Primary</Type> 
-					<Extend>true</Extend> 
+					<Type>Primary</Type>
+					<Extend>true</Extend>
 				  </CreatePartition>
 				</CreatePartitions>
-
 				<ModifyPartitions>
 				  <!-- System partition -->
 				  <ModifyPartition wcm:action="add">
-					<Order>1</Order> 
-					<PartitionID>1</PartitionID> 
-					<Label>System Reserved</Label> 
+					<Order>1</Order>
+					<PartitionID>1</PartitionID>
+					<Label>System Reserved</Label>
 					<Format>NTFS</Format>
 					<Active>true</Active>
 				  </ModifyPartition>
 				  <!-- Windows partition -->
 				  <ModifyPartition wcm:action="add">
-					<Order>2</Order> 
-					<PartitionID>2</PartitionID> 
-					<Label>Windows</Label> 
-					<Letter>C</Letter> 
-					<Format>NTFS</Format> 
+					<Order>2</Order>
+					<PartitionID>2</PartitionID>
+					<Label>Windows</Label>
+					<Letter>C</Letter>
+					<Format>NTFS</Format>
 				  </ModifyPartition>
 				</ModifyPartitions>
 			  </Disk>
-			  <WillShowUI>OnError</WillShowUI> 
+			  <WillShowUI>OnError</WillShowUI>
 			</DiskConfiguration>
       <ImageInstall>
         <OSImage>
           <InstallFrom>
             <MetaData wcm:action="add">
               <Key>/image/index</Key>
-              <Value>1</Value>
+              <Value>2</Value>
             </MetaData>
           </InstallFrom>
           <InstallTo>
@@ -149,7 +148,8 @@
         <RunSynchronousCommand wcm:action="add">
           <Order>1</Order>
           <!-- Install VMware Tools from windows.iso -->
-          <Path>a:\vmtools.cmd</Path>
+          <Path>powershell -ExecutionPolicy Bypass -File a:\vmtools.ps1</Path>
+          <Description>VMTools Setup</Description>
           <WillReboot>Always</WillReboot>
         </RunSynchronousCommand>
       </RunSynchronous>

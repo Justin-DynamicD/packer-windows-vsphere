@@ -1,0 +1,104 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+  - master
+
+schedules:
+  - cron: '0 22 1 * *'
+    displayName: Monthly Build
+    branches:
+      include:
+      - master
+    always: 'true'
+
+variables:
+  - group: VCenterHQ Connection
+  - group: VCenterHQ Secrets
+
+stages:
+  - stage: PackerBuild
+    jobs:
+      - job: preFlight
+        pool: 'On-Prem Default'
+        steps:
+          - task: PowerShell@2
+            name: gatherISO
+            displayName: Gather current date
+            inputs:
+              targetType: inline
+              script: echo "##vso[task.setvariable variable=isoDate;isOutput=true]$(get-date -UFormat %y%m%d)"
+
+      - job: win2012R2
+        dependsOn: preFlight
+        pool: 'On-Prem Default'
+        variables:
+          isoDate: $[ dependencies.preFlight.outputs['gatherISO.isoDate'] ]
+        timeoutInMinutes: 240
+        steps:
+          - task: PowerShell@2
+            displayName: Check for image
+            inputs:
+              filepath: .\pipeline\imagecleanup.ps1
+              arguments: -nameprefix "packer-win2012-$(isoDate)" -lookuponly $true
+            env:
+              VCENTER_USER: $(vcenter-user)
+              VCENTER_PASSWORD: $(vcenter-password)
+          - task: PowerShell@2
+            displayName: Configure Packer Environment
+            condition: and(succeeded(), eq(variables['buildExists'], 'false'))
+            inputs:
+              filepath: .\pipeline\configurepacker.ps1
+          - task: PowerShell@2
+            displayName: Build Image
+            condition: and(succeeded(), eq(variables['buildExists'], 'false'))
+            inputs:
+              targetType: inline
+              script: .\packer build -var "vcenter_user=$(vcenter-user)" -var "vcenter_password=$(vcenter-password)" win2012.json
+          - task: PowerShell@2
+            displayName: Cleanup Excess Images
+            condition: and(succeeded(), eq(variables['buildExists'], 'false'))
+            inputs:
+              filepath: .\pipeline\imagecleanup.ps1
+              arguments: -nameprefix "packer-win2012" -retention 5
+            env:
+              VCENTER_USER: $(vcenter-user)
+              VCENTER_PASSWORD: $(vcenter-password)
+
+      - job: win2016
+        dependsOn: preFlight
+        pool: 'On-Prem Default'
+        variables:
+          isoDate: $[ dependencies.preFlight.outputs['gatherISO.isoDate'] ]
+        timeoutInMinutes: 240
+        steps:
+          - task: PowerShell@2
+            displayName: Check for image
+            inputs:
+              filepath: .\pipeline\imagecleanup.ps1
+              arguments: -nameprefix "packer-win2016-$(isoDate)" -lookuponly $true
+            env:
+              VCENTER_USER: $(vcenter-user)
+              VCENTER_PASSWORD: $(vcenter-password)
+          - task: PowerShell@2
+            displayName: Configure Packer Environment
+            condition: and(succeeded(), eq(variables['buildExists'], 'false'))
+            inputs:
+              filepath: .\pipeline\configurepacker.ps1
+          - task: PowerShell@2
+            displayName: Build Image
+            condition: and(succeeded(), eq(variables['buildExists'], 'false'))
+            inputs:
+              targetType: inline
+              script: .\packer build -var "vcenter_user=$(vcenter-user)" -var "vcenter_password=$(vcenter-password)" win2016.json
+          - task: PowerShell@2
+            displayName: Cleanup Excess Images
+            condition: and(succeeded(), eq(variables['buildExists'], 'false'))
+            inputs:
+              filepath: .\pipeline\imagecleanup.ps1
+              arguments: -nameprefix "packer-win2016" -retention 5
+            env:
+              VCENTER_USER: $(vcenter-user)
+              VCENTER_PASSWORD: $(vcenter-password)
