@@ -1,9 +1,26 @@
-# This install is a bit flakey, as services do not always install correctly in 2016
-# Uses PowerSHell to rectify
-Write-Output "Installing VMTools ..."
-Start-Process -Filepath e:\setup64.exe -ArgumentList '/S /l C:\Windows\Temp\vmware_tools.log /v "/qb REBOOT=ReallySuppress"' -NoNewWindow -Wait
+<#
+VMTools will not install correctly if rollback is disabled, see: https://kb.vmware.com/s/article/1032916
+This script will look at the current configuration and update if needed.
+At completion it reverts to discovered settings.  This entire script is PSv4 so that it can run under 2012R2 as needed.
+#>
 
-# This defines all servies created by VMTools so we can verify the installation was actually sucessfull
+$currentRollbackState = (Get-ItemProperty -Path HKLM:\Software\Policies\Microsoft\Windows\Installer -ErrorAction SilentlyContinue).DisableRollback
+if (($null -ne $currentRollbackState) -and ($currentRollbackState -ne 0)) {
+  Write-Output "DisableRollback has been enabled, temporarily reverting to allow VMTools to complete ..."
+  Set-ItemProperty -Path HKLM:\Software\Policies\Microsoft\Windows\Installer -Name DisableRollback -Value 0
+  $revertRollbackState = $true
+}
+
+# The actual Install
+Write-Output "Installing VMTools ..."
+Start-Process -Filepath e:\setup64.exe -ArgumentList '/S /v "/qb REBOOT=ReallySuppress"' -NoNewWindow -Wait
+
+<#
+Occasionally services will not compeltely install for various reasons that the internet has not yet revealed to me.
+Simply manually install them as needed using PowerShell
+#>
+
+# Define known VMTool services
 $vmServices = @(
   [Hashtable]@{ 
     Name = "VGAuthService" 
@@ -45,9 +62,19 @@ $vmServices = @(
 
 # Check each service and recreate if missing
 ForEach ($service in $vmServices) {
-  Write-Output "Checking Service: $($service.DisplayName)"
+  Write-Output "Checking Service: $($service.DisplayName) ..."
   if (!(get-service $service.Name -ErrorAction SilentlyContinue)) {
     Write-Output "Service not found. Creating..."
     New-Service @service
   }
 }
+
+# Revert the regkey setting if it was changed
+if ($revertRollbackState) {
+  Write-Output "Re-applying original Rollback Settings ..."
+  Set-ItemProperty -Path HKLM:\Software\Policies\Microsoft\Windows\Installer -Name DisableRollback -Value $currentRollbackState
+}
+
+#trim this to save 3 seconds, but I leave this in because VMTools is the devil and sometimes I need to screen cap an error.
+Write-Output "Complete!"
+Start-Sleep -Seconds 3 

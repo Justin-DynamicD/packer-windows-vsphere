@@ -1,11 +1,12 @@
-# Gather OS information to help determine what code to run
-$oSVersion = ([system.version](Get-WMIObject win32_operatingsystem).Version)
-
 ###
 #
 # Common
 #
 ###
+$ErrorActionPreference = "Stop"
+
+# Installs NuGet Package Manager
+Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force
 
 # Installs Chocolatey
 Set-ExecutionPolicy Bypass -Scope Process -Force; Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
@@ -16,14 +17,22 @@ $CurrentPath = (Get-Itemproperty -path 'hklm:\system\currentcontrolset\control\s
 $NewPath = $CurrentPath + ";$($env:ProgramFiles)\Git\cmd"
 Set-ItemProperty -path 'hklm:\system\currentcontrolset\control\session manager\environment' -Name Path -Value $NewPath
 
-###
-#
-# Server 2016 only 
-#
-###
-
-If ($oSVersion.Major -eq 10) {
-    Write-Output "Starting Server 2016 configurations..."
-    Write-Output "Removing conflicting Windows features..."
-    Remove-WindowsFeature -Name "Windows-Defender" -IncludeManagementTools
+# Disable the DSC LCM so external services cannot interfere with configuration
+[DscLocalConfigurationManager()]
+Configuration LCMSettings {
+  Node localhost
+  {
+    Settings
+    {
+      RefreshMode = "Disabled"
+    }
+  }
 }
+LCMSettings
+Set-DscLocalConfigurationManager -Path .\LCMSettings -Verbose
+
+# Install DSC Resource Modules for customization during deployment
+Update-Module -Force -Verbose
+Install-Module -Name CertificateDsc -Force -Verbose # certificate installation
+Install-Module -Name NetworkingDsc -Force -Verbose # allows setting IP/network settings
+Install-Module -Name ComputerManagementDsc -Force -Verbose # Computer renaming, ProductKey Installation

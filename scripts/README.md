@@ -1,6 +1,6 @@
 # File Contents
 
-Scripts in this folder run OS customizations with some inital grouping.  Tweak away.
+Scripts in this folder run OS customizations with some initial grouping.  Tweak away.
 
 ## cleanup.ps1
 
@@ -8,7 +8,7 @@ Final script run, scrubs temp directories and whitespace to ensure final machine
 
 ## configure-host.ps1
 
-General OS configuration. Example context is feature add/remove.
+General OS configuration. Content currently installs Chocolatey, Git, and then some DSC Modules to aide in deployment. Obviously all of this can be changed.
 
 ## winrm.ps1
 
@@ -16,4 +16,4 @@ This was taken from Ansible as its a very complete winrm configuration job.  Wil
 
 ## wmf51.cmd
 
-Installs WMF51 which includes PowerShell 5.1.  Used during Server 2012 installs to ensure later PowerShell scripts run consistently.
+Installs WMF51 which includes PowerShell 5.1.  Used during Server 2012 installs to ensure later PowerShell scripts run consistently, not included with 2016.

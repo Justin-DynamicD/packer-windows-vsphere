@@ -35,6 +35,7 @@
       "winrm_password": "{{ user `win_password` }}",
 
       "CPUs": 2,
+      "CPU_limit": -1,
       "RAM": 8192,
       "disk_controller_type": "pvscsi",
       "disk_size": 60000,
@@ -47,6 +48,7 @@
       ],
       "floppy_files": [
         "{{template_dir}}/bootstrap/2012/",
+        "{{template_dir}}/scripts/vmtools.ps1",
         "{{template_dir}}/scripts/winrm.ps1",
         "{{template_dir}}/scripts/wmf51.cmd"
       ]

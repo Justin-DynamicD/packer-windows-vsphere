@@ -153,7 +153,8 @@
         <RunSynchronousCommand wcm:action="add">
           <Order>1</Order>
           <!-- Install VMware Tools from windows.iso -->
-          <Path>a:\vmtools.cmd</Path>
+          <Path>powershell -ExecutionPolicy Bypass -File a:\vmtools.ps1</Path>
+          <Description>VMTools Setup</Description>
           <WillReboot>Always</WillReboot>
         </RunSynchronousCommand>
       </RunSynchronous>
