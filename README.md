@@ -15,8 +15,9 @@ The following 3rd party modules are required by this build, and should be placed
 
 | module | URL |
 |--------|-----|
-| vsphere-iso | <https://github.com/jetbrains-infra/packer-builder-vsphere> |
 | windows-update | <https://github.com/rgl/packer-provisioner-windows-update> |
+
+Note vsphere-iso has been merged into the official packer binary, and thus is no longer required as a seperate module.
 
 ## Running the build
 
