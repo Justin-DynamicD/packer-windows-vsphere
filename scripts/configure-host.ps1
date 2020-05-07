@@ -4,6 +4,7 @@
 #
 ###
 $ErrorActionPreference = "Stop"
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
 # Installs NuGet Package Manager
 Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force
